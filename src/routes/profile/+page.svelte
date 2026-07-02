@@ -71,7 +71,7 @@
 
     /** @param {string} postId */
     function handleEdit(postId) {
-        goto(resolve(`/write/${postId}`));
+        goto(resolve('/write/[id]', { id: postId }));
     }
 
     /** @param {string} postId */
