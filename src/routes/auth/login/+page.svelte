@@ -106,7 +106,7 @@ import { PUBLIC_API_URL } from '$env/static/public';
     </header>
 
     <main class="min-h-screen flex flex-col justify-center items-center px-margin-mobile pt-24 pb-12">
-        <div class="w-full max-w-100px flex flex-col items-center">
+        <div class="w-full max-w-100 flex flex-col items-center">
             
             <div class="text-center mb-element-gap">
                 <h1 class="font-headline-md text-headline-md text-primary mb-2">Welcome back.</h1>

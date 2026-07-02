@@ -4,6 +4,7 @@
     import { auth } from '$lib/firebase';
     import { onAuthStateChanged } from 'firebase/auth';
     import { getPost } from '$lib/api';
+	import Navbar from '$lib/components/Navbar.svelte';
 
     /** @type {{ id: string, title: string, body: string, created_at: string, status: string } | null} */
     let post = $state(null);
@@ -50,6 +51,8 @@
 <svelte:head>
     <title>{post?.title || 'Post'} | /Blog</title>
 </svelte:head>
+
+<Navbar />
 
 <div class="min-h-screen bg-background px-6 py-16 text-on-background">
     <div class="mx-auto max-w-3xl">
