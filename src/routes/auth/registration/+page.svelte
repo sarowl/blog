@@ -108,7 +108,7 @@
                     <p class="font-body-md text-body-md text-secondary opacity-80">Start sharing your stories with the world today.</p>
                 </header>
                 
-                <form class="space-y-6 text-left" on:submit|preventDefault={handleSignup}>
+                <form class="space-y-6 text-left" onsubmit={handleSignup}>
                     <div class="group">
                         <label class="font-label-md text-label-md text-secondary mb-2 block" for="full_name">Full Name</label>
                         <input 
@@ -150,7 +150,7 @@
                             <button 
                                 class="absolute right-0 top-1/2 -translate-y-1/2 text-secondary opacity-50 hover:opacity-100 transition-opacity" 
                                 type="button"
-                                on:click={togglePassword}
+                                onclick={togglePassword}
                             >
                                 <span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;">
                                     {showPassword ? 'visibility_off' : 'visibility'}
