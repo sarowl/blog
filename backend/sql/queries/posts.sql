@@ -36,4 +36,4 @@ RETURNING *;
 
 -- name: DeletePost :exec
 DELETE FROM posts
-WHERE id = $1;
+WHERE id = $1 AND user_id = $2;

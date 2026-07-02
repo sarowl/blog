@@ -20,18 +20,13 @@
     let error = $state('');
 
 	onMount(async () => {
-	console.log('onMount instance', crypto.randomUUID());
 	try {
 		const data = await getPosts();
-		console.log('getPosts resolved in component, length:', data?.length);
 		posts = Array.isArray(data) ? data : [];
-		console.log('posts assigned, posts.length:', posts.length);
 	} catch (err) {
 		console.log('caught error', err);
-		error = err instanceof Error ? err.message : 'Unable to load posts';
 	} finally {
 		loading = false;
-		console.log('loading set to false');
 	}
 });
 

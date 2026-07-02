@@ -6,20 +6,16 @@ import { PUBLIC_API_URL } from '$env/static/public';
  * @param {RequestInit} [options]
  */
 async function authedFetch(path, options = {}) {
-	console.log('waiting for authStateReady...');
 	const ready = auth.authStateReady();
 	const timeout = new Promise((_, reject) =>
 		setTimeout(() => reject(new Error('authStateReady timed out')), 5000)
 	);
 	await Promise.race([ready, timeout]);
-	console.log('authStateReady resolved, currentUser:', auth.currentUser);
 
 	const user = auth.currentUser;
 	if (!user) throw new Error('Not authenticated');
 
-	console.log('getting ID token...');
 	const token = await user.getIdToken();
-	console.log('got token');
 
 	const res = await fetch(`${PUBLIC_API_URL}${path}`, {
 		...options,
@@ -29,7 +25,6 @@ async function authedFetch(path, options = {}) {
 			...(options.headers || {})
 		}
 	});
-	console.log('fetch resolved, status', res.status);
 
 if (!res.ok) {
 	const text = await res.text();
@@ -38,9 +33,7 @@ if (!res.ok) {
 
 if (res.status === 204) return null;
 
-console.log('about to parse json...');
 const data = await res.json();
-console.log('json parsed', data);
 return data;
 }
 
@@ -82,4 +75,10 @@ export function getMyPosts() {
  */
 export function getPost(id) {
 	return authedFetch(`/api/posts/${id}`, { method: 'GET' });
+}
+/**
+ * @param {string} id
+ */
+export function deleteMyPost(id) {
+	return authedFetch(`/api/posts/${id}`, { method: 'DELETE' });
 }

@@ -6,18 +6,18 @@
     import { PUBLIC_API_URL } from '$env/static/public';
 
     // Form state
-    let fullName = '';
-    let email = '';
-    let password = '';
-    let showPassword = false;
+    let fullName = $state('');
+    let email = $state('');
+    let password = $state('');
+    let showPassword = $state(false);
 
     // Interaction states
-    let isLoading = false;
-    let isSuccess = false;
-    let errorMessage = '';
+    let isLoading = $state(false);
+    let isSuccess = $state(false);
+    let errorMessage = $state('');
 
     // Scroll tracking
-    let scrollProgress = 0;
+    let scrollProgress = $state(0);
 
     const togglePassword = () => {
         showPassword = !showPassword;
@@ -100,7 +100,7 @@
     </header>
 
     <main class="grow flex items-center justify-center px-gutter py-12">
-        <section class="w-full max-w-`440px` flex flex-col items-center">
+        <section class="w-full max-w-110 flex flex-col items-center">
             
             <div class="bg-surface-container-lowest p-8 md:p-12 rounded-lg w-full text-center shadow-[0px_4px_20px_rgba(0,0,0,0.04)] hover:scale-[1.005] transition-transform duration-200 ease-in-out">
                 <header class="mb-element-gap">
@@ -187,24 +187,8 @@
                         Already have an account? 
                         <a class="text-primary font-bold hover:underline" href={resolve('/auth/login')}>Log In</a>
                     </p>
-                    <p class="font-label-md text-[12px] text-outline opacity-70 leading-relaxed max-w-[320px] mx-auto">
-                        By creating an account, you agree to /Blog's 
-                        <a class="underline hover:text-primary" href="#terms">Terms of Service</a> 
-                        and 
-                        <a class="underline hover:text-primary" href="#privacy">Privacy Policy</a>.
-                    </p>
                 </div>
             </div>
         </section>
     </main>
-
-    <footer class="w-full py-8 px-gutter flex flex-col md:flex-row justify-center items-center gap-4 border-t border-surface-container-high mt-auto">
-        <p class="font-label-md text-label-md text-secondary opacity-60">© 2024 /Blog Editorial. All rights reserved.</p>
-        <div class="flex gap-6">
-            <a class="font-label-md text-label-md text-secondary hover:text-primary transition-colors" href="#privacy">Privacy</a>
-            <a class="font-label-md text-label-md text-secondary hover:text-primary transition-colors" href="#terms">Terms</a>
-            <a class="font-label-md text-label-md text-secondary hover:text-primary transition-colors" href="#archive">Archive</a>
-            <a class="font-label-md text-label-md text-secondary hover:text-primary transition-colors" href="#contact">Contact</a>
-        </div>
-    </footer>
 </div>

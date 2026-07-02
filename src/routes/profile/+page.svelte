@@ -3,8 +3,9 @@
     import { goto } from '$app/navigation';
     import { resolve } from '$app/paths';
     import { auth } from '$lib/firebase';
+    import { signOut } from 'firebase/auth';
     import { onAuthStateChanged } from 'firebase/auth';
-    import { getMe, getMyPosts } from '$lib/api';
+    import { getMe, getMyPosts, deleteMyPost } from '$lib/api';
     import Navbar from '$lib/components/Navbar.svelte';
 
     // Scroll progress tracking
@@ -16,6 +17,9 @@
     let posts = $state([]);
     let isLoading = $state(true);
     let loadError = $state('');
+
+    let isLoggingOut = $state(false);
+    let logoutError = $state('');
 
     /** @param {string | null | undefined} value */
     const formatDate = (value) => {
@@ -45,25 +49,57 @@
     };
 
     onMount(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        if (!firebaseUser) {
-            goto(resolve('/auth/login'));
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (!firebaseUser) {
+                goto(resolve('/auth/login'));
+                return;
+            }
+
+            try {
+                user = await getMe();
+                posts = await getMyPosts();
+            } catch (err) {
+                loadError = err instanceof Error ? err.message : 'Could not load your profile.';
+                console.error('Profile load error:', err);
+            } finally {
+                isLoading = false;
+            }
+        });
+
+        return unsubscribe;
+    });
+
+    /** @param {string} postId */
+    function handleEdit(postId) {
+        goto(resolve(`/write/${postId}`));
+    }
+
+    /** @param {string} postId */
+    async function handleDelete(postId) {
+        if (!confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
             return;
         }
 
         try {
-            user = await getMe();
-            posts = await getMyPosts(); 
+            await deleteMyPost(postId);
+            posts = posts.filter((post) => post.id !== postId);
         } catch (err) {
-            loadError = err instanceof Error ? err.message : 'Could not load your profile.';
-            console.error('Profile load error:', err);
-        } finally {
-            isLoading = false;
+            alert(err instanceof Error ? err.message : 'Failed to delete the post.');
         }
-    });
+    }
 
-    return unsubscribe;
-});
+    async function handleLogout() {
+        if (isLoggingOut) return;
+        isLoggingOut = true;
+        logoutError = '';
+        try {
+            await signOut(auth);
+            await goto(resolve('/auth/login'));
+        } catch {
+            logoutError = 'Failed to sign out. Please try again.';
+            isLoggingOut = false;
+        }
+    }
 
 </script>
 
@@ -93,17 +129,35 @@
                 </div>
             {/if}
 
-            <section class="flex flex-col md:flex-row items-center md:items-end gap-6 mb-section-gap">
-                <div class="w-24 h-24 md:w-32 md:h-32 rounded-full bg-surface-container overflow-hidden flex items-center justify-center shadow-sm border border-outline-variant">
-                    <span class="material-symbols-outlined text-outline text-5xl">person</span>
+            <section class="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-section-gap">
+                <div class="flex flex-col md:flex-row items-center md:items-end gap-6">
+                    <div class="w-8 h-8 md:w-16 md:h-16 rounded-full bg-surface-container overflow-hidden flex items-center justify-center shadow-sm border border-outline-variant">
+                        <span class="material-symbols-outlined text-outline text-5xl">person</span>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-1">
+                            {isLoading ? 'Loading...' : (user?.display_name || 'Unknown')}
+                        </h1>
+                        {#if !isLoading && user?.email}
+                            <p class="font-label-md text-label-md text-secondary">
+                                {user.email}
+                            </p>
+                        {/if}
+                    </div>
                 </div>
-                <div class="text-center md:text-left">
-                    <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface mb-1">
-                        {isLoading ? 'Loading...' : (user?.display_name || 'Unknown')}
-                    </h1>
-                    {#if !isLoading && user?.email}
-                        <p class="font-label-md text-label-md text-secondary">
-                            {user.email}
+
+                <div class="flex flex-col items-center md:items-end">
+                    <button
+                        type="button"
+                        onclick={handleLogout}
+                        disabled={isLoggingOut}
+                        class="font-label-md text-label-md text-primary hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline"
+                    >
+                        {isLoggingOut ? 'Signing out...' : 'Log out'}
+                    </button>
+                    {#if logoutError}
+                        <p class="font-label-md text-label-md text-error mt-1">
+                            {logoutError}
                         </p>
                     {/if}
                 </div>
@@ -129,13 +183,37 @@
                                 {post.title}
                             </h2>
                         </header>
+                        
                         <p class="font-body-md text-body-md text-on-surface-variant line-clamp-3 mb-4">
                             {getExcerpt(post.body)}
                         </p>
-                        <a href={resolve(`/posts/${post.id}`)} class="inline-flex items-center gap-2 text-primary font-ui-button text-ui-button cursor-pointer">
-                            Read full story
-                            <span class="material-symbols-outlined read-more-icon">arrow_forward</span>
-                        </a>
+                        
+                        <div class="flex items-center justify-between mt-auto">
+                            <a href={resolve(`/posts/${post.id}`)} class="inline-flex items-center gap-2 text-primary font-ui-button text-ui-button cursor-pointer hover:underline">
+                                Read full story
+                                <span class="material-symbols-outlined read-more-icon">arrow_forward</span>
+                            </a>
+                            
+                            <div class="flex items-center gap-2 text-on-surface-variant">
+                                <button 
+                                    type="button"
+                                    aria-label="Edit post"
+                                    onclick={() => handleEdit(post.id)}
+                                    class="p-2 rounded-full hover:bg-surface-container-high hover:text-primary transition-colors flex items-center justify-center"
+                                >
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">edit</span>
+                                </button>
+                                
+                                <button 
+                                    type="button"
+                                    aria-label="Delete post"
+                                    onclick={() => handleDelete(post.id)}
+                                    class="p-2 rounded-full hover:bg-error-container hover:text-error transition-colors flex items-center justify-center"
+                                >
+                                    <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                                </button>
+                            </div>
+                        </div>
                     </article>
                 {/each}
             </div>

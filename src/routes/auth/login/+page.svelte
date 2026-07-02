@@ -51,7 +51,6 @@ import { PUBLIC_API_URL } from '$env/static/public';
                 throw new Error(text || `Could not fetch user (${res.status})`);
             }
 
-            console.log('Login successful!');
 
             isSuccess = true;
 
@@ -64,7 +63,6 @@ import { PUBLIC_API_URL } from '$env/static/public';
             } else {
                 errorMessage = 'Something went wrong. Please try again.';
             }
-            console.error('Login error:', err);
         } finally {
             isLoading = false;
         }
@@ -191,12 +189,4 @@ import { PUBLIC_API_URL } from '$env/static/public';
             </div>
         </div>
     </main>
-
-    <footer class="w-full py-8 px-gutter flex flex-col md:flex-row justify-center items-center gap-4 opacity-60">
-        <p class="font-label-md text-label-md text-secondary">© 2024 /Blog Editorial. All rights reserved.</p>
-        <div class="flex gap-4">
-            <a class="font-label-md text-label-md text-secondary hover:text-primary transition-colors" href="#privacy">Privacy</a>
-            <a class="font-label-md text-label-md text-secondary hover:text-primary transition-colors" href="#terms">Terms</a>
-        </div>
-    </footer>
 </div>
